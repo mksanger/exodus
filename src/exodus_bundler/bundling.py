@@ -110,7 +110,7 @@ def create_unpackaged_bundle(executables, rename=[], chroot=None, add=[], no_sym
         assert len(executables) >= len(rename), \
             'More renamed options were included than executables.'
         # Pad the rename's with `True` so that `entry_point` can be specified.
-        entry_points = rename + [True for i in range(len(executables) - len(rename))]
+        entry_points = rename + ["True" for i in range(len(executables) - len(rename))]
 
         # Populate the bundle with main executable files and their dependencies.
         for (executable, entry_point) in zip(executables, entry_points):
@@ -449,7 +449,7 @@ class File(object):
         self.path = resolve_file_path(path, search_environment_path=(entry_point is not None))
 
         # Set the entry point for the file.
-        if entry_point is True:
+        if entry_point == "True":
             self.entry_point = os.path.basename(self.path).replace(os.sep, '')
         else:
             self.entry_point = entry_point or None
@@ -466,8 +466,8 @@ class File(object):
         self.no_symlink = self.entry_point and not self.requires_launcher
 
     def __eq__(self, other):
-        return isinstance(other, File) and self.path == self.path and \
-            self.entry_point == self.entry_point
+        return isinstance(other, File) and self.path == other.path and \
+            self.entry_point == other.entry_point
 
     def __hash__(self):
         """Computes a hash for the instance unique up to the file path and entry point."""
