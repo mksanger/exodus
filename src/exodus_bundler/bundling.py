@@ -120,7 +120,7 @@ def create_unpackaged_bundle(executables, rename=[], chroot=None, add=[], no_sym
             # If we did this later, it would practically bring in the whole system...
             if detect:
                 dependency_paths = detect_dependencies(file.path)
-                if not dependency_paths:
+                if not dependency_paths and len(executables) == 1:
                     raise DependencyDetectionError(
                         ('Automatic dependency detection failed. Either "%s" ' % file.path) +
                         'is not tracked by your package manager, or your operating system '
@@ -128,9 +128,14 @@ def create_unpackaged_bundle(executables, rename=[], chroot=None, add=[], no_sym
                         "create an issue at https://github.com/intoli/exodus and we'll try our "
                         ' to add support for it in the future.',
                     )
-
-                for path in dependency_paths:
-                    bundle.add_file(path)
+                elif not dependency_paths:
+                    ''' if multiple executables are packaged together, there may be a mixture of tracked and 
+                        untracked '''
+                    logger.warning(('Automatic dependency detection failed. "%s" ' % file.path) +
+                        'may not be tracked by your package manager')
+                else:
+                    for path in dependency_paths:
+                        bundle.add_file(path)
 
         # Add "additional files" specified with the `--add` option.
         for filename in add:
